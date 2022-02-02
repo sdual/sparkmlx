@@ -6,14 +6,14 @@ lazy val commonSettings = Seq(
   scalaVersion := "2.12.8"
 )
 
-lazy val root = (project in file("."))
+lazy val sparkmlx = (project in file("."))
   .aggregate(
-    sparkMLX
+    core
   )
 
-lazy val sparkMLX = (project in file("sparkmlx"))
+lazy val core = (project in file("core"))
   .settings(
     commonSettings,
-    name := "sparkmlx",
+    name := "core",
     libraryDependencies ++= sparkMLXDependencies
   )
