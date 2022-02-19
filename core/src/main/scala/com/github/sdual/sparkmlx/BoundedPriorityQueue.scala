@@ -3,7 +3,7 @@ package com.github.sdual.sparkmlx
 import java.util.PriorityQueue
 import scala.collection.JavaConverters._
 
-class BoundedPriorityQueue[A <: Ordering[A]](maxSize: Int) extends Iterable[A] with Serializable {
+class BoundedPriorityQueue[A](maxSize: Int)(implicit ord: Ordering[A]) extends Iterable[A] with Serializable {
 
   private val underlying: PriorityQueue[A] = new PriorityQueue[A]()
 
@@ -15,8 +15,8 @@ class BoundedPriorityQueue[A <: Ordering[A]](maxSize: Int) extends Iterable[A] w
     }
   }
 
-  def dequeue(): A = {
-    underlying.poll()
+  def dequeue(): Option[A] = {
+    Option(underlying.poll())
   }
 
   def clear(): Unit = {
@@ -32,13 +32,17 @@ class BoundedPriorityQueue[A <: Ordering[A]](maxSize: Int) extends Iterable[A] w
   }
 
   def addAll(queue: BoundedPriorityQueue[A]): Unit = {
-    queue.foreach(this.enqueue)
+    queue.foreach(enqueue)
+  }
+
+  def first(): A = {
+    underlying.peek()
   }
 
   private def replaceLowest(element: A): Unit = {
     for {
       headElement <- Option(underlying.peek())
-      if headElement.gt(headElement, element)
+      if ord.gt(element, headElement)
       _ = underlying.poll()
       _ = underlying.offer(element)
     } yield ()
@@ -48,8 +52,7 @@ class BoundedPriorityQueue[A <: Ordering[A]](maxSize: Int) extends Iterable[A] w
 }
 
 object BoundedPriorityQueue {
-  def apply[A <: Ordering[A]](maxSize: Int): BoundedPriorityQueue[A] = {
+  def apply[A <: Ordered[A]](maxSize: Int): BoundedPriorityQueue[A] = {
     new BoundedPriorityQueue(maxSize)
   }
 }
-
